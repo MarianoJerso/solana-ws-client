@@ -1,0 +1,167 @@
+Slot: 405809558 | 2026-03-12 01:01:23 | Total Txs: 1168 | Swaps Jupiter: 45
+Slot: 405809559 | 2026-03-12 01:01:24 | Total Txs: 1159 | Swaps Jupiter: 14
+Slot: 405809560 | 2026-03-12 01:01:24 | Total Txs: 1106 | Swaps Jupiter: 15
+Slot: 405809561 | 2026-03-12 01:01:24 | Total Txs: 1219 | Swaps Jupiter: 22
+Slot: 405809562 | 2026-03-12 01:01:25 | Total Txs: 1180 | Swaps Jupiter: 17
+Slot: 405809563 | 2026-03-12 01:01:25 | Total Txs: 1378 | Swaps Jupiter: 44
+Slot: 405809564 | 2026-03-12 01:01:26 | Total Txs: 1212 | Swaps Jupiter: 55
+Slot: 405809565 | 2026-03-12 01:01:26 | Total Txs: 1135 | Swaps Jupiter: 43
+Slot: 405809566 | 2026-03-12 01:01:26 | Total Txs: 1119 | Swaps Jupiter: 46
+Slot: 405809567 | 2026-03-12 01:01:27 | Total Txs: 1180 | Swaps Jupiter: 24
+Slot: 405809568 | 2026-03-12 01:01:27 | Total Txs: 1377 | Swaps Jupiter: 58
+Slot: 405809569 | 2026-03-12 01:01:28 | Total Txs: 1156 | Swaps Jupiter: 29
+Slot: 405809570 | 2026-03-12 01:01:28 | Total Txs: 1164 | Swaps Jupiter: 20
+Slot: 405809571 | 2026-03-12 01:01:28 | Total Txs: 1130 | Swaps Jupiter: 14
+Slot: 405809572 | 2026-03-12 01:01:29 | Total Txs: 1290 | Swaps Jupiter: 15
+Slot: 405809573 | 2026-03-12 01:01:29 | Total Txs: 1082 | Swaps Jupiter: 10
+Slot: 405809574 | 2026-03-12 01:01:29 | Total Txs: 1253 | Swaps Jupiter: 72
+Slot: 405809575 | 2026-03-12 01:01:30 | Total Txs: 1186 | Swaps Jupiter: 54
+Slot: 405809576 | 2026-03-12 01:01:30 | Total Txs: 1542 | Swaps Jupiter: 262
+Slot: 405809577 | 2026-03-12 01:01:31 | Total Txs: 1483 | Swaps Jupiter: 409
+Slot: 405809578 | 2026-03-12 01:01:31 | Total Txs: 1219 | Swaps Jupiter: 170
+Slot: 405809579 | 2026-03-12 01:01:31 | Total Txs: 1152 | Swaps Jupiter: 78
+Slot: 406245339 | 2026-03-14 00:28:04 | Total Txs: 1640 | Swaps Jupiter: 194
+Slot: 406245340 | 2026-03-14 00:28:05 | Total Txs: 1454 | Swaps Jupiter: 206
+Slot: 406245341 | 2026-03-14 00:28:05 | Total Txs: 1121 | Swaps Jupiter: 22
+Slot: 406245342 | 2026-03-14 00:28:06 | Total Txs: 1193 | Swaps Jupiter: 44
+Slot: 406245343 | 2026-03-14 00:28:06 | Total Txs: 1380 | Swaps Jupiter: 133
+Slot: 406245344 | 2026-03-14 00:28:06 | Total Txs: 1066 | Swaps Jupiter: 20
+Slot: 406245345 | 2026-03-14 00:28:07 | Total Txs: 1350 | Swaps Jupiter: 22
+Slot: 406245346 | 2026-03-14 00:28:07 | Total Txs: 1167 | Swaps Jupiter: 33
+Slot: 406245347 | 2026-03-14 00:28:08 | Total Txs: 1228 | Swaps Jupiter: 151
+Slot: 406245348 | 2026-03-14 00:28:08 | Total Txs: 1088 | Swaps Jupiter: 110
+Slot: 406245349 | 2026-03-14 00:28:08 | Total Txs: 1334 | Swaps Jupiter: 65
+Slot: 406245350 | 2026-03-14 00:28:09 | Total Txs: 1783 | Swaps Jupiter: 171
+Slot: 406245351 | 2026-03-14 00:28:09 | Total Txs: 1456 | Swaps Jupiter: 210
+Slot: 406245352 | 2026-03-14 00:28:10 | Total Txs: 1590 | Swaps Jupiter: 282
+Slot: 406245353 | 2026-03-14 00:28:10 | Total Txs: 1588 | Swaps Jupiter: 521
+Slot: 406245354 | 2026-03-14 00:28:10 | Total Txs: 1364 | Swaps Jupiter: 384
+Slot: 406245355 | 2026-03-14 00:28:11 | Total Txs: 1461 | Swaps Jupiter: 437
+Slot: 406245356 | 2026-03-14 00:28:11 | Total Txs: 1102 | Swaps Jupiter: 254
+Slot: 406245357 | 2026-03-14 00:28:11 | Total Txs: 1278 | Swaps Jupiter: 146
+Slot: 406245358 | 2026-03-14 00:28:12 | Total Txs: 1652 | Swaps Jupiter: 76
+Slot: 406245359 | 2026-03-14 00:28:12 | Total Txs: 1338 | Swaps Jupiter: 53
+Slot: 406245360 | 2026-03-14 00:28:12 | Total Txs: 1296 | Swaps Jupiter: 146
+Slot: 406245361 | 2026-03-14 00:28:13 | Total Txs: 1131 | Swaps Jupiter: 86
+Slot: 406245362 | 2026-03-14 00:28:13 | Total Txs: 1241 | Swaps Jupiter: 75
+Slot: 406245363 | 2026-03-14 00:28:14 | Total Txs: 1330 | Swaps Jupiter: 158
+Slot: 406245364 | 2026-03-14 00:28:14 | Total Txs: 900 | Swaps Jupiter: 43
+Slot: 406245365 | 2026-03-14 00:28:14 | Total Txs: 1355 | Swaps Jupiter: 162
+Slot: 406245366 | 2026-03-14 00:28:15 | Total Txs: 1416 | Swaps Jupiter: 376
+Slot: 406245367 | 2026-03-14 00:28:15 | Total Txs: 1499 | Swaps Jupiter: 241
+Slot: 406245368 | 2026-03-14 00:28:16 | Total Txs: 1648 | Swaps Jupiter: 336
+Slot: 406245369 | 2026-03-14 00:28:16 | Total Txs: 1240 | Swaps Jupiter: 147
+Slot: 406245370 | 2026-03-14 00:28:16 | Total Txs: 1120 | Swaps Jupiter: 39
+Slot: 406245371 | 2026-03-14 00:28:17 | Total Txs: 1126 | Swaps Jupiter: 26
+Slot: 406245372 | 2026-03-14 00:28:17 | Total Txs: 1189 | Swaps Jupiter: 52
+Slot: 406245373 | 2026-03-14 00:28:17 | Total Txs: 1057 | Swaps Jupiter: 108
+Slot: 406245374 | 2026-03-14 00:28:18 | Total Txs: 1159 | Swaps Jupiter: 16
+Slot: 406245375 | 2026-03-14 00:28:18 | Total Txs: 1144 | Swaps Jupiter: 46
+Slot: 406245376 | 2026-03-14 00:28:19 | Total Txs: 1655 | Swaps Jupiter: 181
+Slot: 406245377 | 2026-03-14 00:28:19 | Total Txs: 1144 | Swaps Jupiter: 37
+Slot: 406245378 | 2026-03-14 00:28:20 | Total Txs: 1115 | Swaps Jupiter: 3
+Slot: 406245379 | 2026-03-14 00:28:20 | Total Txs: 1211 | Swaps Jupiter: 33
+Slot: 406245380 | 2026-03-14 00:28:20 | Total Txs: 1063 | Swaps Jupiter: 28
+Slot: 406245381 | 2026-03-14 00:28:21 | Total Txs: 1203 | Swaps Jupiter: 35
+Slot: 406245382 | 2026-03-14 00:28:21 | Total Txs: 1322 | Swaps Jupiter: 67
+Slot: 406245383 | 2026-03-14 00:28:22 | Total Txs: 1236 | Swaps Jupiter: 56
+Slot: 406245384 | 2026-03-14 00:28:22 | Total Txs: 1220 | Swaps Jupiter: 50
+Slot: 406245385 | 2026-03-14 00:28:23 | Total Txs: 1189 | Swaps Jupiter: 45
+Slot: 406245386 | 2026-03-14 00:28:23 | Total Txs: 1164 | Swaps Jupiter: 22
+Slot: 406245387 | 2026-03-14 00:28:23 | Total Txs: 1188 | Swaps Jupiter: 31
+Slot: 406245388 | 2026-03-14 00:28:24 | Total Txs: 1552 | Swaps Jupiter: 79
+Slot: 406245389 | 2026-03-14 00:28:24 | Total Txs: 1153 | Swaps Jupiter: 31
+Slot: 406245390 | 2026-03-14 00:28:25 | Total Txs: 1106 | Swaps Jupiter: 15
+Slot: 406245391 | 2026-03-14 00:28:25 | Total Txs: 1153 | Swaps Jupiter: 24
+Slot: 406245392 | 2026-03-14 00:28:25 | Total Txs: 1106 | Swaps Jupiter: 22
+Slot: 406245393 | 2026-03-14 00:28:26 | Total Txs: 1054 | Swaps Jupiter: 15
+Slot: 406245394 | 2026-03-14 00:28:26 | Total Txs: 1160 | Swaps Jupiter: 23
+Slot: 406245395 | 2026-03-14 00:28:26 | Total Txs: 1178 | Swaps Jupiter: 41
+Slot: 406245396 | 2026-03-14 00:28:27 | Total Txs: 1311 | Swaps Jupiter: 34
+Slot: 406245397 | 2026-03-14 00:28:27 | Total Txs: 1042 | Swaps Jupiter: 16
+Slot: 406245398 | 2026-03-14 00:28:28 | Total Txs: 1171 | Swaps Jupiter: 23
+Slot: 406245399 | 2026-03-14 00:28:28 | Total Txs: 1223 | Swaps Jupiter: 64
+Slot: 406245400 | 2026-03-14 00:28:28 | Total Txs: 1482 | Swaps Jupiter: 105
+Slot: 406245401 | 2026-03-14 00:28:29 | Total Txs: 1198 | Swaps Jupiter: 75
+Slot: 406245402 | 2026-03-14 00:28:29 | Total Txs: 1161 | Swaps Jupiter: 23
+Slot: 406245403 | 2026-03-14 00:28:29 | Total Txs: 1419 | Swaps Jupiter: 190
+Slot: 406245404 | 2026-03-14 00:28:30 | Total Txs: 1343 | Swaps Jupiter: 268
+Slot: 406245405 | 2026-03-14 00:28:30 | Total Txs: 1184 | Swaps Jupiter: 237
+Slot: 406245406 | 2026-03-14 00:28:31 | Total Txs: 1134 | Swaps Jupiter: 204
+Slot: 406245407 | 2026-03-14 00:28:31 | Total Txs: 1230 | Swaps Jupiter: 130
+Slot: 406245408 | 2026-03-14 00:28:31 | Total Txs: 1051 | Swaps Jupiter: 50
+Slot: 406245409 | 2026-03-14 00:28:32 | Total Txs: 1186 | Swaps Jupiter: 84
+Slot: 406245410 | 2026-03-14 00:28:32 | Total Txs: 1121 | Swaps Jupiter: 84
+Slot: 406245411 | 2026-03-14 00:28:33 | Total Txs: 1144 | Swaps Jupiter: 91
+Slot: 406245412 | 2026-03-14 00:28:33 | Total Txs: 1511 | Swaps Jupiter: 125
+Slot: 406245413 | 2026-03-14 00:28:33 | Total Txs: 1358 | Swaps Jupiter: 46
+Slot: 406245414 | 2026-03-14 00:28:34 | Total Txs: 1257 | Swaps Jupiter: 55
+Slot: 406245415 | 2026-03-14 00:28:34 | Total Txs: 1220 | Swaps Jupiter: 127
+Slot: 406245416 | 2026-03-14 00:28:35 | Total Txs: 1419 | Swaps Jupiter: 85
+Slot: 406245417 | 2026-03-14 00:28:35 | Total Txs: 1237 | Swaps Jupiter: 31
+Slot: 406245418 | 2026-03-14 00:28:35 | Total Txs: 1232 | Swaps Jupiter: 27
+Slot: 406245419 | 2026-03-14 00:28:36 | Total Txs: 1237 | Swaps Jupiter: 88
+Slot: 406245420 | 2026-03-14 00:28:36 | Total Txs: 1286 | Swaps Jupiter: 178
+Slot: 406245421 | 2026-03-14 00:28:37 | Total Txs: 1130 | Swaps Jupiter: 113
+Slot: 406245422 | 2026-03-14 00:28:37 | Total Txs: 1130 | Swaps Jupiter: 61
+Slot: 406245423 | 2026-03-14 00:28:37 | Total Txs: 1058 | Swaps Jupiter: 30
+Slot: 406245424 | 2026-03-14 00:28:38 | Total Txs: 1293 | Swaps Jupiter: 65
+Slot: 406245425 | 2026-03-14 00:28:38 | Total Txs: 1052 | Swaps Jupiter: 14
+Slot: 406245426 | 2026-03-14 00:28:39 | Total Txs: 1103 | Swaps Jupiter: 31
+Slot: 406245427 | 2026-03-14 00:28:39 | Total Txs: 1247 | Swaps Jupiter: 17
+Slot: 406245428 | 2026-03-14 00:28:39 | Total Txs: 1561 | Swaps Jupiter: 292
+Slot: 406245429 | 2026-03-14 00:28:40 | Total Txs: 1384 | Swaps Jupiter: 265
+Slot: 406245430 | 2026-03-14 00:28:40 | Total Txs: 1307 | Swaps Jupiter: 273
+Slot: 406245431 | 2026-03-14 00:28:40 | Total Txs: 1269 | Swaps Jupiter: 140
+Slot: 406245432 | 2026-03-14 00:28:41 | Total Txs: 985 | Swaps Jupiter: 31
+Slot: 406245433 | 2026-03-14 00:28:41 | Total Txs: 1253 | Swaps Jupiter: 85
+Slot: 406245434 | 2026-03-14 00:28:41 | Total Txs: 1242 | Swaps Jupiter: 65
+Slot: 406245435 | 2026-03-14 00:28:42 | Total Txs: 1223 | Swaps Jupiter: 113
+Slot: 406245436 | 2026-03-14 00:28:42 | Total Txs: 1387 | Swaps Jupiter: 84
+Slot: 406245437 | 2026-03-14 00:28:43 | Total Txs: 1092 | Swaps Jupiter: 69
+Slot: 406245438 | 2026-03-14 00:28:43 | Total Txs: 1076 | Swaps Jupiter: 23
+Slot: 406245439 | 2026-03-14 00:28:44 | Total Txs: 1127 | Swaps Jupiter: 49
+Slot: 406245440 | 2026-03-14 00:28:44 | Total Txs: 1215 | Swaps Jupiter: 62
+[Worker #1] Slot: 406251118 | 2026-03-14 01:05:51 | Total Txs: 1079 | Swaps Jupiter: 12
+[Worker #3] Slot: 406251119 | 2026-03-14 01:05:51 | Total Txs: 1081 | Swaps Jupiter: 2
+[Worker #5] Slot: 406251120 | 2026-03-14 01:05:51 | Total Txs: 1126 | Swaps Jupiter: 13
+[Worker #7] Slot: 406251121 | 2026-03-14 01:05:52 | Total Txs: 1182 | Swaps Jupiter: 14
+[Worker #9] Slot: 406251122 | 2026-03-14 01:05:52 | Total Txs: 1234 | Swaps Jupiter: 10
+[Worker #10] Slot: 406251125 | 2026-03-14 01:05:53 | Total Txs: 1101 | Swaps Jupiter: 12
+[Worker #8] Slot: 406251126 | 2026-03-14 01:05:54 | Total Txs: 1084 | Swaps Jupiter: 12
+[Worker #4] Slot: 406251127 | 2026-03-14 01:05:54 | Total Txs: 1092 | Swaps Jupiter: 13
+[Worker #2] Slot: 406251123 | 2026-03-14 01:05:53 | Total Txs: 1318 | Swaps Jupiter: 16
+[Worker #6] Slot: 406251124 | 2026-03-14 01:05:53 | Total Txs: 1148 | Swaps Jupiter: 13
+[Worker #3] Slot: 406251128 | 2026-03-14 01:05:54 | Total Txs: 1387 | Swaps Jupiter: 73
+[Worker #5] Slot: 406251130 | 2026-03-14 01:05:55 | Total Txs: 1147 | Swaps Jupiter: 58
+[Worker #7] Slot: 406251131 | 2026-03-14 01:05:56 | Total Txs: 1202 | Swaps Jupiter: 30
+[Worker #8] Slot: 406251134 | 2026-03-14 01:05:57 | Total Txs: 1124 | Swaps Jupiter: 39
+[Worker #10] Slot: 406251133 | 2026-03-14 01:05:57 | Total Txs: 1102 | Swaps Jupiter: 67
+[Worker #4] Slot: 406251135 | 2026-03-14 01:05:58 | Total Txs: 1121 | Swaps Jupiter: 41
+[Worker #1] Slot: 406251129 | 2026-03-14 01:05:55 | Total Txs: 1510 | Swaps Jupiter: 263
+[Worker #2] Slot: 406251136 | 2026-03-14 01:05:58 | Total Txs: 1238 | Swaps Jupiter: 58
+[Worker #9] Slot: 406251132 | 2026-03-14 01:05:56 | Total Txs: 1446 | Swaps Jupiter: 157
+[Worker #6] Slot: 406251137 | 2026-03-14 01:05:58 | Total Txs: 1310 | Swaps Jupiter: 143
+[Worker #5] Slot: 406251139 | 2026-03-14 01:05:59 | Total Txs: 1237 | Swaps Jupiter: 88
+[Worker #3] Slot: 406251138 | 2026-03-14 01:05:59 | Total Txs: 1302 | Swaps Jupiter: 107
+[Worker #7] Slot: 406251140 | 2026-03-14 01:06:00 | Total Txs: 1158 | Swaps Jupiter: 241
+[Worker #10] Slot: 406251142 | 2026-03-14 01:06:00 | Total Txs: 1419 | Swaps Jupiter: 286
+[Worker #8] Slot: 406251141 | 2026-03-14 01:06:00 | Total Txs: 1754 | Swaps Jupiter: 358
+[Worker #2] Slot: 406251145 | 2026-03-14 01:06:02 | Total Txs: 1254 | Swaps Jupiter: 81
+[Worker #9] Slot: 406251146 | 2026-03-14 01:06:02 | Total Txs: 1174 | Swaps Jupiter: 98
+[Worker #4] Slot: 406251143 | 2026-03-14 01:06:01 | Total Txs: 1444 | Swaps Jupiter: 314
+[Worker #6] Slot: 406251147 | 2026-03-14 01:06:02 | Total Txs: 1152 | Swaps Jupiter: 66
+[Worker #1] Slot: 406251144 | 2026-03-14 01:06:01 | Total Txs: 1507 | Swaps Jupiter: 144
+[Worker #3] Slot: 406251149 | 2026-03-14 01:06:03 | Total Txs: 1127 | Swaps Jupiter: 49
+[Worker #5] Slot: 406251148 | 2026-03-14 01:06:03 | Total Txs: 1305 | Swaps Jupiter: 106
+[Worker #7] Slot: 406251150 | 2026-03-14 01:06:04 | Total Txs: 1122 | Swaps Jupiter: 52
+[Worker #10] Slot: 406251151 | 2026-03-14 01:06:04 | Total Txs: 1106 | Swaps Jupiter: 14
+[Worker #8] Slot: 406251152 | 2026-03-14 01:06:04 | Total Txs: 1136 | Swaps Jupiter: 39
+[Worker #2] Slot: 406251153 | 2026-03-14 01:06:05 | Total Txs: 1196 | Swaps Jupiter: 80
+[Worker #9] Slot: 406251154 | 2026-03-14 01:06:05 | Total Txs: 1226 | Swaps Jupiter: 74
+[Worker #7] Slot: 406251160 | 2026-03-14 01:06:08 | Total Txs: 946 | Swaps Jupiter: 13
+[Worker #4] Slot: 406251155 | 2026-03-14 01:06:06 | Total Txs: 1292 | Swaps Jupiter: 96
+[Worker #1] Slot: 406251157 | 2026-03-14 01:06:06 | Total Txs: 1225 | Swaps Jupiter: 75
+[Worker #5] Slot: 406251159 | 2026-03-14 01:06:07 | Total Txs: 1158 | Swaps Jupiter: 48
+[Worker #3] Slot: 406251158 | 2026-03-14 01:06:07 | Total Txs: 1220 | Swaps Jupiter: 49
+[Worker #6] Slot: 406251156 | 2026-03-14 01:06:06 | Total Txs: 1319 | Swaps Jupiter: 62

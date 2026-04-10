@@ -9,50 +9,37 @@ use std::sync::Arc;
 use sqlx::sqlite::SqlitePoolOptions;
 
 // ==============================================================================
-// 🌐 CONFIGURACIÓN GLOBAL
+// GLOBAL CONFIGURATION
 // ==============================================================================
 const URL_SOLANA_WS: &str = "wss://solana-mainnet.core.chainstack.com/4f6a60821bf93dc2d08750216894e530";
 const URL_SOLANA_HTTP: &str = "https://solana-mainnet.core.chainstack.com/4f6a60821bf93dc2d08750216894e530";
-// El identificador único de Júpiter Agregator (el "Google Flights" de Solana)
+
+// Jupiter Aggregator Program ID
 const JUPITER_ID: &str = "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4";
 
 // ==============================================================================
-// 🚀 INICIO DEL RUNTIME (MOTOR ASÍNCRONO)
-// #[tokio::main] le dice al compilador: "Enchufá el motor de Tokio".
-// Internamente levanta un Pool de Threads de sistema operativo y prepara el 
-// acceso a 'epoll' del Kernel para eventos de red.
+// RUNTIME ENTRY_POINT
 // ==============================================================================
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // --------------------------------------------------------------------------
-    // 🔗 CAPA DE RECURSOS COMPARTIDOS (Arc: Atomic Reference Counter)
-    // Inicializamos Reqwest, el cliente HTTP que maneja las conexiones TCP/TLS.
-    // Usamos `Arc` porque necesitamos que nuestros 10 Workers usen el mismo cliente 
-    // sin hacer copias pesadas en la memoria.
+    // SHARED RESOURCES (Arc)
     // --------------------------------------------------------------------------
     let http_client = Arc::new(Client::new());
 
-    // ==============================================================================
-    // 🗄️ INICIALIZACIÓN DE LA BASE DE DATOS (SQLITE)
-    // ==============================================================================
-    println!("Iniciando base de datos...");
+    // --------------------------------------------------------------------------
+    // DATABASE INITIALIZATION (SQLite)
+    // --------------------------------------------------------------------------
+    println!("[INFO] Initializing SQLite database...");
     
-    // Creamos un POOL de conexiones asincrónicas. Como tenemos múltiples Workers 
-    // intentando escribir en disco al mismo tiempo, el Pool organiza y comparte 
-    // las conexiones disponibles. SQLite es un archivo único en disco.
-    const CANTIDAD_WORKERS: usize = 10;
+    const WORKER_COUNT: usize = 10;
     
     let pool = SqlitePoolOptions::new()
-        // Permitimos tantas conexiones máximas simultáneas como trabajadores tengamos
-        .max_connections(CANTIDAD_WORKERS as u32)
-        // param 'mode=rwc' -> Read, Write, Create (Crea el archivo si no existe)
+        .max_connections(WORKER_COUNT as u32)
         .connect("sqlite:swaps.db?mode=rwc")
         .await?;
 
-    // Ejecutamos SQL crudo para levantar la tabla estructural si es que es la primera 
-    // vez que ejecutamos el código. 
-    // AUTOINCREMENT asigna automáticamente el ID 1, 2, 3...
     sqlx::query(
         "CREATE TABLE IF NOT EXISTS swaps (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,51 +51,40 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     )
     .execute(&pool)
     .await?;
-    println!("Base de datos lista!\n");
+
+    println!("[INFO] Database successfully initialized.\n");
 
     // --------------------------------------------------------------------------
-    // 📦 EL TUBO DE COMUNICACIÓN (Canal MPMC)
-    // Multi-Producer, Multi-Consumer. Es el "desacople" arquitectónico entre 
-    // el WebSocket y los Workers HTTP.
-    // tx = Transmisor (WS manda slots)
-    // rx = Receptor (Workers consumen slots de la cola)
+    // MPMC CHANNEL (Message Buffer)
     // --------------------------------------------------------------------------
     let (tx_slots, rx_slots) = async_channel::bounded::<u64>(500);
 
     // --------------------------------------------------------------------------
-    // ⚙️ EL EJÉRCITO DE CONSUMIDORES (WORKERS)
-    // Spawneamos (tiramos a la cola de Tokio) tareas concurrentes.
-    // Tokio balanceará estos "Futures" entre sus threads reales.
+    // ASYNC HTTP WORKERS POOL
     // --------------------------------------------------------------------------
-    for id_worker in 1..=CANTIDAD_WORKERS {
+    for worker_id in 1..=WORKER_COUNT {
         
-        // Cada trabajador necesita su propia "copia" del tubo, del HTTP, y de la Base de Datos
-        let rx_clon = rx_slots.clone();
-        let http_clon = Arc::clone(&http_client);
-        let pool_clon = pool.clone(); // SqlitePool ya es un Arc por debajo, clone es muy barato
+        let rx_clone = rx_slots.clone();
+        let http_clone = Arc::clone(&http_client);
+        let pool_clone = pool.clone();
 
-        // `tokio::spawn(async move { ... })` transfiere la propiedad/ownership
-        // exclusivamente a esta tarea, previniendo crashes de memoria.
         tokio::spawn(async move {
-            println!("  [Worker #{}] En posicion y esperando instrucciones...", id_worker);
+            println!("[Worker #{}] Spun up and awaiting tasks...", worker_id);
 
-            // rx_clon.recv().await: si la cola está vacía, devuelve Poll::Pending
-            // y el thread no se bloquea, sino que Tokio lo pasa a dormir.
-            while let Ok(numero_slot) = rx_clon.recv().await {
+            while let Ok(slot_number) = rx_clone.recv().await {
                 
-                let max_reintentos = 10;
-                let mut bloque_encontrado = false;
+                let max_retries = 10;
+                let mut block_found = false;
 
-                // Loop de reintentos
-                for intento in 1..=max_reintentos {
+                // Linear backoff retry loop
+                for attempt in 1..=max_retries {
                     
-                    // Armamos el pedido JSON-RPC 2.0 (RPC = Remote Procedure Call)
                     let request_body = json!({
                         "jsonrpc": "2.0",
                         "id": 1,
                         "method": "getBlock",
                         "params": [
-                            numero_slot,
+                            slot_number,
                             {
                                "encoding": "json",
                                "transactionDetails": "full",
@@ -118,97 +94,91 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         ]
                     });
 
-                    // post().await -> Cruza la red. Devuelve "Pending", libera el Thread.
-                    match http_clon.post(URL_SOLANA_HTTP).json(&request_body).send().await {
+                    match http_clone.post(URL_SOLANA_HTTP).json(&request_body).send().await {
                         Ok(resp) => {
-                            // Llegaron los headers HTTP. Ahora esperamos que bajen los megabytes del bloque
                             if let Ok(block_data) = resp.json::<Value>().await {
                                 
-                                // ¿El servidor respondió con error (el bloque aún no existe)?
+                                // Handle RPC node synchronization delays (Block not available yet)
                                 if block_data.get("error").is_some() {
-                                    // BACKOFF LINEAL: Espera que aumenta para no saturar al servidor
-                                    let demora_ms = 500 * intento; 
-                                    println!("  [Worker #{}] Slot {} demorado (intento {}/{}). Esperando {}ms...", id_worker, numero_slot, intento, max_reintentos, demora_ms);
+                                    let backoff_ms = 500 * attempt; 
+                                    println!("[Worker #{}] Slot {} delayed (attempt {}/{}). Sleeping {}ms...", worker_id, slot_number, attempt, max_retries, backoff_ms);
                                     
-                                    tokio::time::sleep(Duration::from_millis(demora_ms)).await;
+                                    tokio::time::sleep(Duration::from_millis(backoff_ms)).await;
                                     continue; 
                                 }
 
-                                // Si el bloque existe, procesamos y cortamos el loop de reintentos
-                                if let Some(resultado_bloque) = block_data.get("result") {
-                                    procesar_y_guardar_bloque(numero_slot, resultado_bloque, id_worker, pool_clon.clone()).await;
-                                    bloque_encontrado = true;
+                                // Successful block retrieval
+                                if let Some(block_result) = block_data.get("result") {
+                                    process_and_store_block(slot_number, block_result, worker_id, pool_clone.clone()).await;
+                                    block_found = true;
                                     break;
                                 }
                             }
                         },
                         Err(_) => {
-                            println!("  [Worker #{}] Error de red en slot {}. Reintentando...", id_worker, numero_slot);
+                            println!("[Worker #{}] Network error fetching slot {}. Retrying...", worker_id, slot_number);
                             tokio::time::sleep(Duration::from_millis(1000)).await;
                         }
                     }
                 }
 
-                if !bloque_encontrado {
-                    println!("❌ [Worker #{}] Slot Skippeado irrecuperable: {}", id_worker, numero_slot);
+                if !block_found {
+                    println!("[ERROR] Worker #{} failed to retrieve slot {} after {} attempts. Skipping.", worker_id, slot_number, max_retries);
                 }
             }
         });
     }
 
     // ==============================================================================
-    // 🔊 EL PRODUCTOR PRINCIPAL (WEBSOCKET)
-    // El hilo principal se dedica exclusivamente a escuchar la red.
+    // MAIN THREAD: WEBSOCKET PRODUCER
     // ==============================================================================
     loop {
-        println!("Intentando conectar al WebSocket de Chainstack...");
+        println!("[INFO] Attempting to connect to Chainstack WebSocket...");
 
         let url = Url::parse(URL_SOLANA_WS)?;
         
         let (ws_stream, _) = match connect_async(url).await {
             Ok(s) => s,
             Err(e) => {
-                println!("Error WS, reintentando en 3 segundos... ({})", e);
+                println!("[ERROR] WS connection failed, retrying in 3 seconds: {}", e);
                 tokio::time::sleep(Duration::from_secs(3)).await;
                 continue;
             }
         };
 
-        println!("Conectado! Enviando suscripcion de SLOTS...\n");
+        println!("[INFO] Connected successfully. Transmitting slot subscription payload...\n");
         
-        // Separamos el tubo bidireccional en dos (Ownership borrow rules de Rust)
         let (mut write, mut read) = ws_stream.split();
 
-        // Le avisamos al nodo que queremos notificaciones "ligeras" de slots
-        let mensaje_suscripcion = json!({
+        let subscription_payload = json!({
             "jsonrpc": "2.0",
             "id": 1,
             "method": "slotSubscribe"
         });
 
-        if let Err(e) = write.send(Message::Text(mensaje_suscripcion.to_string())).await {
-            println!("Error enviando suscripcion: {}", e);
+        if let Err(e) = write.send(Message::Text(subscription_payload.to_string())).await {
+            println!("[ERROR] Failed to send subscription payload: {}", e);
             continue;
         }
 
-        // 🚨 Loop de escaneo ultrarrápido
+        // Fast Event Loop
         loop {
-            // El thread asincrónico duerme hasta que "epoll" avise que llegaron bytes por la red
-            if let Some(respuesta) = read.next().await {
-                match respuesta {
-                    Ok(mensaje) => {
-                        if let Message::Text(texto) = mensaje {
-                            let json_parseado: Result<Value, _> = serde_json::from_str(&texto);
-                            if let Ok(datos) = json_parseado {
-                                // Navega el JSON directo para descartar payload inútil
-                                if let Some(slot_obj) = datos.pointer("/params/result/slot") {
-                                    if let Some(numero_slot) = slot_obj.as_u64() {
+            if let Some(response) = read.next().await {
+                match response {
+                    Ok(message) => {
+                        if let Message::Text(text) = message {
+                            let parsed_json: Result<Value, _> = serde_json::from_str(&text);
+                            if let Ok(data) = parsed_json {
+                                
+                                // Pointer extraction to mitigate full document deserialization overhead
+                                if let Some(slot_obj) = data.pointer("/params/result/slot") {
+                                    if let Some(slot_number) = slot_obj.as_u64() {
                                         
-                                        println!("🔔 [WS Rápido] Nuevo Slot detectado: {}", numero_slot);
+                                        println!("[WS] Slot notification received: {}", slot_number);
                                         
-                                        // Empujar slot al 'buffer' MPMC.
-                                        if let Err(e) = tx_slots.send(numero_slot).await {
-                                            println!("Error tirando slot al canal: {}", e);
+                                        // Push to MPMC channel queue
+                                        if let Err(e) = tx_slots.send(slot_number).await {
+                                            println!("[ERROR] Failed to push slot to channel: {}", e);
                                         }
                                         
                                     }
@@ -217,7 +187,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         }
                     }
                     Err(e) => {
-                        println!("WebSocket cortado: {}. Reconectando...\n", e);
+                        println!("[ERROR] WebSocket disconnected: {}. Attempting reconnect...\n", e);
                         break; 
                     }
                 }
@@ -227,34 +197,32 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 // ==============================================================================
-// 📊 LOGICA DE PROCESAMIENTO (DATA INGESTION) Y COMPRESIÓN
+// BLOCK PROCESSING (DATA INGESTION)
 // ==============================================================================
-async fn procesar_y_guardar_bloque(numero_slot: u64, resultado_bloque: &Value, id_worker: usize, db_pool: sqlx::SqlitePool) {
+async fn process_and_store_block(slot_number: u64, block_result: &Value, worker_id: usize, db_pool: sqlx::SqlitePool) {
     
-    // Parseo de Unix Epoch a fecha humana.
-    let unix_time = resultado_bloque["blockTime"].as_i64().unwrap_or(0);
+    // Parse Unix Epoch to human-readable datetime
+    let unix_time = block_result["blockTime"].as_i64().unwrap_or(0);
     let datetime: DateTime<Utc> = Utc.timestamp_opt(unix_time, 0).unwrap();
     
-    // Extracción de Cantidad con |closure| seguro
-    let tx_count = resultado_bloque["transactions"].as_array().map(|arr| arr.len()).unwrap_or(0);
-    let mut swaps_encontrados = 0;
+    let tx_count = block_result["transactions"].as_array().map(|arr| arr.len()).unwrap_or(0);
+    let mut jupiter_swaps_found = 0;
 
-    if let Some(transacciones) = resultado_bloque["transactions"].as_array() {
-        for tx in transacciones {
+    if let Some(transactions) = block_result["transactions"].as_array() {
+        for tx in transactions {
             
-            // HACK DE COMPRESIÓN DE SOLANA:
-            // Solana indexa a los participantes en 'accountKeys'. Las instrucciones
-            // individuales solo guardan un número de índice hacia esta lista.
+            // Extract the global account keys referenced by indexed pointers within this transaction
             let account_keys = &tx["transaction"]["message"]["accountKeys"];
 
-            if let Some(instrucciones) = tx["transaction"]["message"]["instructions"].as_array() {
-                for instruccion in instrucciones {
-                    if let Some(idx) = instruccion["programIdIndex"].as_u64() {
+            if let Some(instructions) = tx["transaction"]["message"]["instructions"].as_array() {
+                for instruction in instructions {
+                    if let Some(idx) = instruction["programIdIndex"].as_u64() {
                         
-                        // Rescatamos del ELENCO al participante usando el índice numérico
+                        // Resolve the index pointer against the accountKeys array
                         let program_id = account_keys[idx as usize].as_str().unwrap_or("");
+                        
                         if program_id == JUPITER_ID {
-                            swaps_encontrados += 1;
+                            jupiter_swaps_found += 1;
                         }
                     }
                 }
@@ -263,36 +231,31 @@ async fn procesar_y_guardar_bloque(numero_slot: u64, resultado_bloque: &Value, i
     }
 
     // ==============================================================================
-    // 💾 INSERCIÓN EN BASE DE DATOS (ASYNC SQL)
+    // SQLITE ASYNC INSERTION
     // ==============================================================================
-    // En lugar de escribir a un archivo de texto, insertamos de manera atómica (segura) 
-    // en nuestra base de datos.
-    // Usamos '?' como place-holders para evitar Inyecciones SQL, y usamos el encadenamiento 
-    // de métodos .bind() para inyectar nuestras variables en esos signos de interrogación.
-    let result = sqlx::query(
+    let query_result = sqlx::query(
         "INSERT INTO swaps (slot_number, unix_timestamp, tx_count, jupiter_swaps) VALUES (?, ?, ?, ?)"
     )
-    .bind(numero_slot as i64)         // ?1
-    .bind(unix_time)                  // ?2
-    .bind(tx_count as i64)            // ?3
-    .bind(swaps_encontrados as i64)   // ?4
-    .execute(&db_pool)                // Pasamos la prestada referencia al Pool de conexiones
-    .await;                           // Await: Guardar a disco es lento. El thread se libera.
+    .bind(slot_number as i64)
+    .bind(unix_time)
+    .bind(tx_count as i64)
+    .bind(jupiter_swaps_found as i64)
+    .execute(&db_pool)
+    .await;
 
-    // Comprobamos si la inserción (Query) fue un éxito o tiró un Error
-    match result {
+    match query_result {
         Ok(_) => {
-            let linea_resultado = format!("[Worker #{}] Slot: {} | {} | Total Txs: {} | Swaps Jupiter: {}\n",
-                id_worker,
-                numero_slot,
+            let output_line = format!("[Worker #{}] Slot: {} | {} | Total Txs: {} | Jupiter Swaps: {}\n",
+                worker_id,
+                slot_number,
                 datetime.format("%Y-%m-%d %H:%M:%S"),
                 tx_count,
-                swaps_encontrados
+                jupiter_swaps_found
             );
-            print!("  ✅ ¡ÉXITO (BD)! | {}", linea_resultado);
+            print!("[SUCCESS] {}", output_line);
         },
         Err(e) => {
-            println!("Error guardando en BD (Slot {}): {}", numero_slot, e);
+            println!("[ERROR] Failed to persist data for slot {}: {}", slot_number, e);
         }
     }
 }

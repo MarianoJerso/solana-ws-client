@@ -5,9 +5,8 @@ use serde_json::{json, Value};
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 use url::Url;
 use std::time::Duration;
-use std::fs::OpenOptions;
-use std::io::Write;
 use std::sync::Arc;
+use sqlx::sqlite::SqlitePoolOptions;
 
 const URL_SOLANA_WS: &str = "wss://solana-mainnet.core.chainstack.com/4f6a60821bf93dc2d08750216894e530";
 const URL_SOLANA_HTTP: &str = "https://solana-mainnet.core.chainstack.com/4f6a60821bf93dc2d08750216894e530";
@@ -19,7 +18,38 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Esto permite que el cliente sea compartido de forma segura entre todos los clones/trabajadores
     let http_client = Arc::new(Client::new());
 
-    // 2. CREAMOS EL CANAL MPMC (Multi-Producer, Multi-Consumer)
+    // ==============================================================================
+    // 🗄️ INICIALIZACIÓN DE LA BASE DE DATOS (SQLITE)
+    // ==============================================================================
+    println!("Iniciando base de datos...");
+    
+    // Creamos un POOL de conexiones asincrónicas. Como tenemos múltiples Workers 
+    // intentando escribir en disco al mismo tiempo, el Pool organiza y comparte 
+    // las conexiones disponibles. SQLite es un archivo único en disco.
+    let pool = SqlitePoolOptions::new()
+        // Permitimos tantas conexiones máximas simultáneas como trabajadores tengamos
+        .max_connections(CANTIDAD_WORKERS as u32)
+        // param 'mode=rwc' -> Read, Write, Create (Crea el archivo si no existe)
+        .connect("sqlite:swaps.db?mode=rwc")
+        .await?;
+
+    // Ejecutamos SQL crudo para levantar la tabla estructural si es que es la primera 
+    // vez que ejecutamos el código. 
+    // AUTOINCREMENT asigna automáticamente el ID 1, 2, 3...
+    sqlx::query(
+        "CREATE TABLE IF NOT EXISTS swaps (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            slot_number INTEGER NOT NULL,
+            unix_timestamp INTEGER NOT NULL,
+            tx_count INTEGER NOT NULL,
+            jupiter_swaps INTEGER NOT NULL
+        )"
+    )
+    .execute(&pool)
+    .await?;
+    println!("Base de datos lista!\n");
+
+    // 3. CREAMOS EL CANAL MPMC (Multi-Producer, Multi-Consumer)
     // Usamos `async_channel` porque el mpsc nativo de Tokio no permite clonar el receptor (rx)
     // Dejamos 500 espacios en el tubo por las dudas
     let (tx_slots, rx_slots) = async_channel::bounded::<u64>(500);
@@ -31,9 +61,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     for id_worker in 1..=CANTIDAD_WORKERS {
         
-        // Cada trabajador necesita su propia "copia" del tubo y del cliente HTTP
+        // Cada trabajador necesita su propia "copia" del tubo, del HTTP, y de la Base de Datos
         let rx_clon = rx_slots.clone();
         let http_clon = Arc::clone(&http_client);
+        let pool_clon = pool.clone(); // SqlitePool ya es un Arc por debajo, clone es muy barato
 
         tokio::spawn(async move {
             println!("  [Worker #{}] En posicion y esperando instrucciones...", id_worker);
@@ -41,7 +72,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             // Cada trabajador chupa de la misma manguera compartida
             while let Ok(numero_slot) = rx_clon.recv().await {
                 
-                let max_reintentos = 5;
+                let max_reintentos = 10;
                 let mut bloque_encontrado = false;
 
                 for intento in 1..=max_reintentos {
@@ -72,7 +103,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 }
 
                                 if let Some(resultado_bloque) = block_data.get("result") {
-                                    procesar_y_guardar_bloque(numero_slot, resultado_bloque, id_worker);
+                                    procesar_y_guardar_bloque(numero_slot, resultado_bloque, id_worker, pool_clon.clone()).await;
                                     bloque_encontrado = true;
                                     break;
                                 }
@@ -155,8 +186,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 }
 
-// Factorizamos la logica ruidosa de iterar transacciones en una funcion de ayuda pura
-fn procesar_y_guardar_bloque(numero_slot: u64, resultado_bloque: &Value, id_worker: usize) {
+// Factorizamos la logica ruidosa de iterar transacciones en una funcion de ayuda asincronica
+async fn procesar_y_guardar_bloque(numero_slot: u64, resultado_bloque: &Value, id_worker: usize, db_pool: sqlx::SqlitePool) {
     let unix_time = resultado_bloque["blockTime"].as_i64().unwrap_or(0);
     let datetime: DateTime<Utc> = Utc.timestamp_opt(unix_time, 0).unwrap();
     
@@ -180,23 +211,37 @@ fn procesar_y_guardar_bloque(numero_slot: u64, resultado_bloque: &Value, id_work
         }
     }
 
-    let linea_resultado = format!("[Worker #{}] Slot: {} | {} | Total Txs: {} | Swaps Jupiter: {}\n",
-        id_worker,
-        numero_slot,
-        datetime.format("%Y-%m-%d %H:%M:%S"),
-        tx_count,
-        swaps_encontrados
-    );
+    // ==============================================================================
+    // 💾 INSERCIÓN EN BASE DE DATOS (ASYNC SQL)
+    // ==============================================================================
+    // En lugar de escribir a un archivo de texto, insertamos de manera atómica (segura) 
+    // en nuestra base de datos.
+    // Usamos '?' como place-holders para evitar Inyecciones SQL, y usamos el encadenamiento 
+    // de métodos .bind() para inyectar nuestras variables en esos signos de interrogación.
+    let result = sqlx::query(
+        "INSERT INTO swaps (slot_number, unix_timestamp, tx_count, jupiter_swaps) VALUES (?, ?, ?, ?)"
+    )
+    .bind(numero_slot as i64)         // ?1
+    .bind(unix_time)                  // ?2
+    .bind(tx_count as i64)            // ?3
+    .bind(swaps_encontrados as i64)   // ?4
+    .execute(&db_pool)                // Pasamos la prestada referencia al Pool de conexiones
+    .await;                           // Await: Guardar a disco es lento. El thread se libera.
 
-    print!("  ✅ ¡ÉXITO! | {}", linea_resultado);
-
-    let mut archivo = OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open("jupiter_swaps.txt")
-        .expect("No se pudo abrir el archivo para guardar");
-
-    if let Err(e) = write!(archivo, "{}", linea_resultado) {
-        println!("Error escribiendo en el archivo: {}", e);
+    // Comprobamos si la inserción (Query) fue un éxito o tiró un Error de Constraint/Disco
+    match result {
+        Ok(_) => {
+            let linea_resultado = format!("[Worker #{}] Slot: {} | {} | Total Txs: {} | Swaps Jupiter: {}\n",
+                id_worker,
+                numero_slot,
+                datetime.format("%Y-%m-%d %H:%M:%S"),
+                tx_count,
+                swaps_encontrados
+            );
+            print!("  ✅ ¡ÉXITO (BD)! | {}", linea_resultado);
+        },
+        Err(e) => {
+            println!("Error guardando en BD (Slot {}): {}", numero_slot, e);
+        }
     }
 }

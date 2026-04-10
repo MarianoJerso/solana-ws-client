@@ -1,57 +1,37 @@
-# 🦀 Nodo de Ingestión de Datos de Solana
+# solana-ws-client
 
-![Rust](https://img.shields.io/badge/Rust-000000?style=for-the-badge&logo=rust&logoColor=white)
-![Solana](https://img.shields.io/badge/Solana-14F195?style=for-the-badge&logo=solana&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)
+[Read in English](README.md)
 
-*[🇬🇧 Read in English](README.md)*
+`solana-ws-client` es un nodo de ingestión de datos asincrónico para la blockchain de Solana. Emplea una arquitectura orientada a eventos para indexar la actividad on-chain en tiempo real, enfocándose actualmente en el volumen de enrutamiento automatizado.
 
-Un nodo de ingestión de datos asincrónico y de alto rendimiento para la blockchain de Solana. Construido íntegramente en Rust, este sistema demuestra conceptos avanzados de sistemas distribuidos, concurrencia segura en memoria y arquitectura orientada a eventos para indexar la actividad de exchanges descentralizados (DEX) en tiempo real.
+## Arquitectura
 
----
+El sistema desacopla la transmisión de notificaciones de la obtención de datos pesados para mitigar bloqueos de línea ("head-of-line blocking"):
 
-## 🏗️ Diseño de Arquitectura (Event-Driven Fetching)
+1. **Capa de Notificaciones**: Una conexión WebSocket se suscribe a las notificaciones de slots de Solana (`slotSubscribe`) para mantener un flujo de eventos de baja latencia.
+2. **Canal MPMC**: Un canal limitado de múltiples productores y múltiples consumidores (MPMC) actúa como búfer para las notificaciones de slots entrantes, proporcionando control de contrapresión (backpressure).
+3. **Workers Asincrónicos**: Un pool configurable de workers basados en Tokio consume del canal, ejecutando peticiones JSON-RPC POST para obtener los datos completos de los bloques.
+4. **Persistencia**: Las métricas de los bloques extraídos y los agregados de transacciones se escriben de manera asincrónica en una base de datos local SQLite utilizando `sqlx`.
 
-Este proyecto evita los típicos cuellos de botella ("Head-of-Line blocking") separando la capa de notificaciones de la capa pesada de descarga de datos:
+## Detalles Técnicos
 
-1. **Capa Ligera de Notificaciones:** Una conexión WebSocket se suscribe a los eventos de nuevos slots en la red. Escucha notificaciones minúsculas ("Ding! Nuevo slot X") y las empuja inmediatamente a un búfer interno.
-2. **Desacoplamiento (Canal MPMC):** Un canal MPMC (Multi-Producer Multi-Consumer) con límite dinámico actúa como red de seguridad y amortiguador entre el WebSocket ultrarrápido y las descargas HTTP más lentas.
-3. **Capa de Procesamiento Pesado (Workers Asincrónicos):** Un ejército de 10 trabajadores concurrentes consume el canal MPMC constantemente. Ejecutan peticiones HTTP POST (JSON-RPC) para descargar el bloque de datos completo (de varios megabytes) y parsean miles de transacciones por bloque en paralelo.
+- **Runtime**: Utiliza `tokio` para operaciones de I/O no bloqueantes y planificación de tareas (scheduling).
+- **Concurrencia**: El estado se comparte entre los workers mediante `Arc` (pools de conexión de reqwest, pools de base de datos de sqlx) para evitar duplicación en memoria.
+- **Confiabilidad**: Las peticiones de red implementan una estrategia de retroceso lineal (linear backoff) para manejar límites de ratio y retrasos en la propagación de bloques.
+- **Análisis Sintáctico (Parsing)**: La inspección directa del arreglo `accountKeys` y los punteros de instrucción (`programIdIndex`) minimiza la fragmentación de memoria al identificar contratos inteligentes específicos (ej. Jupiter Aggregator).
 
-## 🧠 Conceptos Clave de Ingeniería de Sistemas
+## Uso
 
-Este repositorio sirve como portafolio demostrativo de programación a bajo nivel:
+### Dependencias
 
-*   **I/O No Bloqueante (`tokio` & epoll):** Se evita por completo el bloqueo de los hilos físicos del Sistema Operativo. Los Workers ceden el control activamente al runtime de `tokio` (Ready/Pending Queue) mientras esperan respuestas de red TCP/TLS o de lectura/escritura en Disco.
-*   **Concurrencia con Seguridad de Memoria (`Arc<T>`):** Utilización de Contadores de Referencia Atómicos (Atomic Reference Counters) para compartir el pool de conexiones de `reqwest` y el pool de base de datos de `sqlx` entre todos los Workers simultáneamente sin usar costosos bloqueos mutuos o duplicar RAM.
-*   **Tolerancia a Fallos (Backoff Retry):** El sistema utiliza un algoritmo de retroceso lineal (500ms * intento) para reponerse suavemente de caídas temporales de red o propagaciones tardías de bloques en Solana, evitando el crasheo del programa.
-*   **Parsing Estructural de Protocolos:** Navegación directa sobre jerarquías complejas tipo JSON para resolver el sistema de compresión de Solana (utilizando punteros de `programIdIndex` hacia sub-listas de `accountKeys`) para aislar operaciones específicas de contratos inteligentes.
-*   **Persistencia Asincrónica Relacional:** Almacenamiento seguro en disco utilizando una Base de Datos SQLite, insertando la información estructurada a través de directivas asincrónicas de la librería `sqlx` chequeadas en tiempo de compilación.
+- Rust (Edición 2024 o superior)
 
-## 🚀 Inicio Rápido
+### Compilar y Ejecutar
 
-### Prerrequisitos
-- [Rust](https://www.rust-lang.org/) (Edición 2024)
-- Conexión a internet para compilar las dependencias (`crates`).
-
-### Instalación y Ejecución
 ```bash
-# Clonar el proyecto
 git clone https://github.com/MarianoJerso/solana-ws-client.git
 cd solana-ws-client
-
-# Iniciar el nodo
-cargo run
+cargo run --release
 ```
 
-Al iniciarse, el sistema creará automáticamente el archivo relacional `swaps.db` y comenzará a ingestar y analizar bloques de la blockchain en vivo.
-
-## 📊 Extracción de Datos (Jupiter Routing)
-
-La base de datos actual está configurada para recopilar y cuantificar el volumen transaccional de **Jupiter Aggregator**, el DEX principal de Solana. En cada bloque se guarda:
-- `slot_number`: El bloque exacto en la cadena.
-- `unix_timestamp`: La fecha y hora plana universal (lista para matemáticas de series temporales).
-- `tx_count`: Conteo absoluto de transacciones de toda la red en ese bloque.
-- `jupiter_swaps`: Veces exactas que un usuario interactuó con el smart contract de Jupiter.
-
-*Estos datos representan la capa de infraestructura fundacional requerida para construir Detección de MEV, análisis cuantitativos del mercado o motores de trading algorítmico.*
+Al inicializarse, la aplicación creará un archivo de base de datos SQLite `swaps.db` en el directorio raíz y comenzará a indexar los datos de los bloques automáticamente.
